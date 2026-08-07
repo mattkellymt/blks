@@ -1,3 +1,3 @@
-from blks.torch.optimizers import Adam
-
-__all__ = ["Adam"]
+"""
+PyTorch building blocks and utilities.
+"""
