@@ -1,7 +1,7 @@
 [project]
 name = "blks"
-version = "2026.8.1"
-description = "Add your description here"
+version = "2026.8.2"
+description = "Building blocks and shared utilities for Python projects"
 readme = "README.md"
 authors = [
     { name = "matt", email = "" }

@@ -1,0 +1,32 @@
+# blks 🧩
+
+> Building blocks and shared utilities for Python projects.
+
+[![PyPI version](https://img.shields.io/pypi/v/blks.svg)](https://pypi.org/project/blks/)
+[![License](https://img.shields.io/github/license/mattkellymt/blks.svg)](https://github.com/mattkellymt/blks)
+
+## Installation
+
+Using `uv`:
+
+```bash
+uv add blks
+```
+
+Or using `pip`:
+
+```bash
+pip install blks
+```
+
+## Quick Start
+
+```python
+import blks
+
+print(blks.__version__)
+```
+
+## License
+
+MIT
