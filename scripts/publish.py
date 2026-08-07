@@ -43,11 +43,28 @@ def calculate_next_calver(current_version: str) -> str:
     return f"{year}.{month}.{next_build}"
 
 
-def update_file(path: Path, old_ver: str, new_ver: str) -> None:
-    """Replace old version string with new version string in a file."""
-    if path.exists():
-        text = path.read_text(encoding="utf-8")
-        path.write_text(text.replace(f'"{old_ver}"', f'"{new_ver}"'), encoding="utf-8")
+def update_pyproject(new_version: str) -> None:
+    """Update version line in pyproject.toml."""
+    lines = []
+    for line in PYPROJECT_PATH.read_text(encoding="utf-8").splitlines():
+        if line.startswith("version ="):
+            lines.append(f'version = "{new_version}"')
+        else:
+            lines.append(line)
+    PYPROJECT_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def update_init(new_version: str) -> None:
+    """Update __version__ line in src/blks/__init__.py."""
+    if not INIT_PATH.exists():
+        return
+    lines = []
+    for line in INIT_PATH.read_text(encoding="utf-8").splitlines():
+        if line.startswith("__version__ ="):
+            lines.append(f'__version__ = "{new_version}"')
+        else:
+            lines.append(line)
+    INIT_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def main():
@@ -58,8 +75,8 @@ def main():
     print(f"Bumping version: {current_ver} -> {new_ver}")
 
     # 1. Update pyproject.toml & __init__.py
-    update_file(PYPROJECT_PATH, current_ver, new_ver)
-    update_file(INIT_PATH, current_ver, new_ver)
+    update_pyproject(new_ver)
+    update_init(new_ver)
 
     # 2. Commit, tag, and push to GitHub
     subprocess.run(["git", "add", "."], cwd=ROOT_DIR, check=True)
