@@ -6,6 +6,8 @@ CalVer Release & Publishing Script for blks.
 from datetime import datetime
 from pathlib import Path
 import subprocess
+import sys
+import tomllib
 
 ROOT_DIR = Path(__file__).parent.parent.resolve()
 PYPROJECT_PATH = ROOT_DIR / "pyproject.toml"
@@ -13,11 +15,17 @@ INIT_PATH = ROOT_DIR / "src" / "blks" / "__init__.py"
 
 
 def get_current_version() -> str:
-    """Read the current version from pyproject.toml."""
-    for line in PYPROJECT_PATH.read_text().splitlines():
-        if line.startswith("version ="):
-            return line.split('"')[1]
-    return "0.1.0"
+    """Read current version from pyproject.toml using tomllib."""
+    if not PYPROJECT_PATH.exists():
+        sys.exit(f"Error: File not found: {PYPROJECT_PATH}")
+
+    with open(PYPROJECT_PATH, "rb") as f:
+        data = tomllib.load(f)
+
+    try:
+        return data["project"]["version"]
+    except KeyError:
+        sys.exit("Error: 'project.version' field missing in pyproject.toml")
 
 
 def calculate_next_calver(current_version: str) -> str:
@@ -38,8 +46,8 @@ def calculate_next_calver(current_version: str) -> str:
 def update_file(path: Path, old_ver: str, new_ver: str) -> None:
     """Replace old version string with new version string in a file."""
     if path.exists():
-        text = path.read_text()
-        path.write_text(text.replace(f'"{old_ver}"', f'"{new_ver}"'))
+        text = path.read_text(encoding="utf-8")
+        path.write_text(text.replace(f'"{old_ver}"', f'"{new_ver}"'), encoding="utf-8")
 
 
 def main():
