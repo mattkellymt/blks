@@ -19,6 +19,22 @@ Or using `pip`:
 pip install blks
 ```
 
+## Upgrading
+
+To upgrade to the latest version:
+
+Using `uv`:
+
+```bash
+uv add --upgrade blks
+```
+
+Or using `pip`:
+
+```bash
+pip install --upgrade blks
+```
+
 ## Quick Start
 
 ```python
