@@ -28,7 +28,7 @@ def get_version() -> str:
         sys.exit("Error: 'project.version' field missing in pyproject.toml")
 
 
-def increment_version(current_version: str) -> str:
+def update_version(current_version: str) -> str:
     """Calculate next YYYY.M.BUILD version based on today's date."""
     now = datetime.now()
     year = now.year
@@ -53,7 +53,7 @@ def update_pyproject(old_ver: str, new_ver: str) -> None:
 
 def main():
     current_ver = get_version()
-    new_ver = increment_version(current_ver)
+    new_ver = update_version(current_ver)
     tag_name = f"v{new_ver}"
 
     print(f"Bumping version: {current_ver} -> {new_ver}")
