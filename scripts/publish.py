@@ -14,7 +14,7 @@ PYPROJECT_PATH = ROOT_DIR / "pyproject.toml"
 INIT_PATH = ROOT_DIR / "src" / "blks" / "__init__.py"
 
 
-def get_current_version() -> str:
+def get_version() -> str:
     """Read current version from pyproject.toml using tomllib."""
     if not PYPROJECT_PATH.exists():
         sys.exit(f"Error: File not found: {PYPROJECT_PATH}")
@@ -28,7 +28,7 @@ def get_current_version() -> str:
         sys.exit("Error: 'project.version' field missing in pyproject.toml")
 
 
-def calculate_next_calver(current_version: str) -> str:
+def increment_version(current_version: str) -> str:
     """Calculate next YYYY.M.BUILD version based on today's date."""
     now = datetime.now()
     year = now.year
@@ -43,23 +43,23 @@ def calculate_next_calver(current_version: str) -> str:
     return f"{year}.{month}.{next_build}"
 
 
-def update_file(path: Path, old_ver: str, new_ver: str) -> None:
-    """Replace old version string with new version string in a file."""
-    if path.exists():
-        text = path.read_text(encoding="utf-8")
-        path.write_text(text.replace(f'"{old_ver}"', f'"{new_ver}"'), encoding="utf-8")
+def update_pyproject(old_ver: str, new_ver: str) -> None:
+    """Replace version string in pyproject.toml and __init__.py."""
+    for path in [PYPROJECT_PATH, INIT_PATH]:
+        if path.exists():
+            text = path.read_text(encoding="utf-8")
+            path.write_text(text.replace(f'"{old_ver}"', f'"{new_ver}"'), encoding="utf-8")
 
 
 def main():
-    current_ver = get_current_version()
-    new_ver = calculate_next_calver(current_ver)
+    current_ver = get_version()
+    new_ver = increment_version(current_ver)
     tag_name = f"v{new_ver}"
 
     print(f"Bumping version: {current_ver} -> {new_ver}")
 
-    # 1. Update pyproject.toml & __init__.py
-    update_file(PYPROJECT_PATH, current_ver, new_ver)
-    update_file(INIT_PATH, current_ver, new_ver)
+    # 1. Update version strings
+    update_pyproject(current_ver, new_ver)
 
     # 2. Commit, tag, and push to GitHub
     subprocess.run(["git", "add", "."], cwd=ROOT_DIR, check=True)
