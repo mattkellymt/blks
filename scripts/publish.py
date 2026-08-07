@@ -61,7 +61,11 @@ def main():
     # 1. Update version strings
     update_pyproject(current_ver, new_ver)
 
-    # 2. Commit, tag, and push to GitHub
+    # 2. Sync virtual environment and lockfile (upgrade dependencies)
+    print("Syncing virtual environment and upgrading dependencies with uv...")
+    subprocess.run(["uv", "sync", "--upgrade"], cwd=ROOT_DIR, check=True)
+
+    # 3. Commit, tag, and push to GitHub
     subprocess.run(["git", "add", "."], cwd=ROOT_DIR, check=True)
     subprocess.run(["git", "commit", "-m", f"release: {new_ver}"], cwd=ROOT_DIR, check=True)
     subprocess.run(["git", "tag", tag_name], cwd=ROOT_DIR, check=True)
