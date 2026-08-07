@@ -1,6 +1,6 @@
 [project]
 name = "blks"
-version = "2026.8.12"
+version = "2026.8.13"
 description = "Building blocks and shared utilities for Python projects"
 readme = "README.md"
 license = "MIT"

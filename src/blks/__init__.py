@@ -2,7 +2,7 @@
 blks - Building blocks and utilities for Python projects.
 """
 
-__version__ = "2026.8.12"
+__version__ = "2026.8.13"
 
 
 def hello() -> str:
