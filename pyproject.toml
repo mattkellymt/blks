@@ -1,16 +1,15 @@
 [project]
 name = "blks"
-version = "2026.8.13"
+version = "2026.8.14"
 description = "Building blocks and shared utilities for Python projects"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [
-    { name = "matt", email = "" }
+    { name = "matt" }
 ]
 requires-python = ">=3.11"
 classifiers = [
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
 ]
 dependencies = [

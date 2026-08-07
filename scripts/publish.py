@@ -6,26 +6,22 @@ CalVer Release & Publishing Script for blks.
 from datetime import datetime
 from pathlib import Path
 import subprocess
-import sys
-import tomllib
 
 ROOT_DIR = Path(__file__).parent.parent.resolve()
-PYPROJECT_PATH = ROOT_DIR / "pyproject.toml"
-INIT_PATH = ROOT_DIR / "src" / "blks" / "__init__.py"
 
 
 def get_version() -> str:
-    """Read current version from pyproject.toml using tomllib."""
-    if not PYPROJECT_PATH.exists():
-        sys.exit(f"Error: File not found: {PYPROJECT_PATH}")
+    """Read the current project version via `uv version`."""
+    result = subprocess.run(
+        ["uv", "version", "--short"],
+        cwd=ROOT_DIR, capture_output=True, text=True, check=True,
+    )
+    return result.stdout.strip()
 
-    with open(PYPROJECT_PATH, "rb") as f:
-        data = tomllib.load(f)
 
-    try:
-        return data["project"]["version"]
-    except KeyError:
-        sys.exit("Error: 'project.version' field missing in pyproject.toml")
+def set_version(new_ver: str) -> None:
+    """Set the project version, updating pyproject.toml and re-locking uv.lock."""
+    subprocess.run(["uv", "version", new_ver], cwd=ROOT_DIR, check=True)
 
 
 def update_version(current_version: str) -> str:
@@ -43,14 +39,6 @@ def update_version(current_version: str) -> str:
     return f"{year}.{month}.{next_build}"
 
 
-def update_pyproject(old_ver: str, new_ver: str) -> None:
-    """Replace version string in pyproject.toml and __init__.py."""
-    for path in [PYPROJECT_PATH, INIT_PATH]:
-        if path.exists():
-            text = path.read_text(encoding="utf-8")
-            path.write_text(text.replace(f'"{old_ver}"', f'"{new_ver}"'), encoding="utf-8")
-
-
 def main():
     current_ver = get_version()
     new_ver = update_version(current_ver)
@@ -58,14 +46,10 @@ def main():
 
     print(f"Bumping version: {current_ver} -> {new_ver}")
 
-    # 1. Update version strings
-    update_pyproject(current_ver, new_ver)
+    # 1. Update version (pyproject.toml + uv.lock)
+    set_version(new_ver)
 
-    # 2. Sync virtual environment and lockfile (upgrade dependencies)
-    print("Syncing virtual environment and upgrading dependencies with uv...")
-    subprocess.run(["uv", "sync", "--upgrade"], cwd=ROOT_DIR, check=True)
-
-    # 3. Commit, tag, and push to GitHub
+    # 2. Commit, tag, and push to GitHub
     subprocess.run(["git", "add", "."], cwd=ROOT_DIR, check=True)
     subprocess.run(["git", "commit", "-m", f"release: {new_ver}"], cwd=ROOT_DIR, check=True)
     subprocess.run(["git", "tag", tag_name], cwd=ROOT_DIR, check=True)
