@@ -8,7 +8,7 @@ resolution-markers = [
 
 [[package]]
 name = "blks"
-version = "2026.8.23"
+version = "2026.8.24"
 source = { editable = "." }
 dependencies = [
     { name = "torch" },
