@@ -1,6 +1,6 @@
 import math
 import torch
-from blks.torch.optimizers.adam import Adam
+from blks.torch.optim.adam import Adam
 
 
 class Muon(torch.optim.Optimizer):
