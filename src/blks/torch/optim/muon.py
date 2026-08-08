@@ -1,84 +1,99 @@
 import math
 import torch
-from blks.torch.optim.adamw import AdamW
 
 
 class Muon(torch.optim.Optimizer):
     """
-    Muon optimizer implementation with Newton-Schulz orthogonalization.
+    Muon: momentum SGD whose 2D update is orthogonalized by Newton-Schulz iteration
+    (Jordan et al.). Matches torch.optim.Muon in user-facing signature and numerics.
+
+    Muon only updates 2D parameters. Optimize other parameters (biases, embeddings,
+    heads) with a standard method such as AdamW.
     """
 
     def __init__(
         self,
         params,
-        lr,
-        weight_decay,
-        momentum,
-        nesterov,
-        eps,
-        ns_steps,
-        adamw_lr,
-        adamw_betas,
-        adamw_eps,
-        adamw_wd,
+        lr=1e-3,
+        weight_decay=0.1,
+        momentum=0.95,
+        nesterov=True,
+        ns_coefficients=(3.4445, -4.7750, 2.0315),
+        eps=1e-7,
+        ns_steps=5,
+        adjust_lr_fn=None,
     ):
-        params_list = list(params)
-        muon_params = [p for p in params_list if p.ndim == 2]
-        adamw_params = [p for p in params_list if p.ndim != 2]
         defaults = dict(
             lr=lr,
             weight_decay=weight_decay,
             momentum=momentum,
             nesterov=nesterov,
+            ns_coefficients=ns_coefficients,
             eps=eps,
             ns_steps=ns_steps,
+            adjust_lr_fn=adjust_lr_fn,
         )
-        super().__init__(muon_params, defaults)
-        self.adamw = AdamW(adamw_params, adamw_lr, adamw_betas, adamw_eps, adamw_wd)
+        super().__init__(params, defaults)
+        for group in self.param_groups:
+            for p in group["params"]:
+                if p.ndim != 2:
+                    raise ValueError(
+                        f"Muon only supports 2D parameters; got shape {tuple(p.shape)}"
+                    )
 
-    def step_newton_schulz(self, update, a, b, c):
-        g = update @ update.T
-        g_upd = torch.addmm(g, g, g, beta=b, alpha=c)
-        alpha_one = 1.0
-        update_next = torch.addmm(update, g_upd, update, beta=a, alpha=alpha_one)
-        return update_next
+    def newton_schulz_iter(self, ortho, a, b, c):
+        gram = ortho @ ortho.T
+        gram_update = torch.addmm(gram, gram, gram, beta=b, alpha=c)
+        return torch.addmm(ortho, gram_update, ortho, beta=a)
 
-    def newton_schulz(self, grad, eps, steps):
-        a, b, c = 3.4445, -4.7750, 2.0315
-        update = grad.bfloat16()
-        is_transposed = grad.size(0) > grad.size(1)
-        if is_transposed:
-            update = update.T
-        update.div_(update.norm().clamp(eps))
-        for step_idx in range(steps):
-            update = self.step_newton_schulz(update, a, b, c)
-        if is_transposed:
-            update = update.T
-        return update
+    def newton_schulz(self, grad, ns_coefficients, ns_steps, eps):
+        a, b, c = ns_coefficients
+        transpose = grad.size(0) > grad.size(1)
+        ortho = grad.bfloat16()
+        if transpose:
+            ortho = ortho.T
+        ortho = ortho.div(ortho.norm().clamp(min=eps))
+        for _ in range(ns_steps):
+            ortho = self.newton_schulz_iter(ortho, a, b, c)
+        if transpose:
+            ortho = ortho.T
+        return ortho
+
+    def adjust_lr(self, lr, adjust_lr_fn, shape):
+        a, b = shape[:2]
+        if adjust_lr_fn is None or adjust_lr_fn == "original":
+            ratio = math.sqrt(max(1, a / b))
+        elif adjust_lr_fn == "match_rms_adamw":
+            ratio = 0.2 * math.sqrt(max(a, b))
+        else:
+            ratio = 1.0
+        return lr * ratio
 
     def step_param(self, p, group):
         if p.grad is None:
             return
         lr = group["lr"]
-        wd = group["weight_decay"]
-        mom = group["momentum"]
-        nest = group["nesterov"]
+        weight_decay = group["weight_decay"]
+        momentum = group["momentum"]
+        nesterov = group["nesterov"]
+        ns_coefficients = group["ns_coefficients"]
         eps = group["eps"]
-        steps = group["ns_steps"]
+        ns_steps = group["ns_steps"]
+        adjust_lr_fn = group["adjust_lr_fn"]
         grad = p.grad
         state = self.state[p]
-        if "buf" not in state:
-            state["buf"] = torch.zeros_like(grad)
-        buf = state["buf"]
-        mom_weight = 1 - mom
-        buf.lerp_(grad, mom_weight)
-        update = grad.lerp(buf, mom) if nest else buf
-        update = self.newton_schulz(update, eps, steps)
-        ratio = max(1, p.shape[0] / p.shape[1])
-        adj_lr = lr * math.sqrt(ratio)
-        neg_adj_lr = -adj_lr
-        p.mul_(1 - lr * wd)
-        p.add_(update, alpha=neg_adj_lr)
+
+        if "momentum_buffer" not in state:
+            state["momentum_buffer"] = torch.zeros_like(p)
+        buf = state["momentum_buffer"]
+
+        buf.lerp_(grad, 1 - momentum)
+        update = grad.lerp(buf, momentum) if nesterov else buf
+        update = self.newton_schulz(update, ns_coefficients, ns_steps, eps)
+
+        adjusted_lr = self.adjust_lr(lr, adjust_lr_fn, p.shape)
+        p.mul_(1 - lr * weight_decay)
+        p.add_(update, alpha=-adjusted_lr)
 
     def step_group(self, group):
         for p in group["params"]:
@@ -88,4 +103,3 @@ class Muon(torch.optim.Optimizer):
     def step(self):
         for group in self.param_groups:
             self.step_group(group)
-        self.adamw.step()

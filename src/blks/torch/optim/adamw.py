@@ -4,48 +4,77 @@ import torch
 
 class AdamW(torch.optim.Optimizer):
     """
-    AdamW optimizer: Adam with decoupled weight decay (Loshchilov & Hutter, 2019).
+    AdamW: Adam with decoupled weight decay (Loshchilov & Hutter, 2019).
+
+    Matches torch.optim.AdamW in user-facing signature and numerics.
     """
 
-    def __init__(self, params, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.0):
+    def __init__(
+        self,
+        params,
+        lr=1e-3,
+        betas=(0.9, 0.999),
+        eps=1e-8,
+        weight_decay=1e-2,
+        amsgrad=False,
+    ):
         defaults = dict(
             lr=lr,
-            beta1=betas[0],
-            beta2=betas[1],
+            betas=betas,
             eps=eps,
             weight_decay=weight_decay,
+            amsgrad=amsgrad,
         )
         super().__init__(params, defaults)
+
+    def init_state(self, state, p, amsgrad):
+        state["step"] = 0
+        state["exp_avg"] = torch.zeros_like(p)
+        state["exp_avg_sq"] = torch.zeros_like(p)
+        if amsgrad:
+            state["max_exp_avg_sq"] = torch.zeros_like(p)
+
+    def denom(self, state, amsgrad, bias_correction2_sqrt, eps):
+        exp_avg_sq = state["exp_avg_sq"]
+        if amsgrad:
+            max_exp_avg_sq = state["max_exp_avg_sq"]
+            torch.maximum(max_exp_avg_sq, exp_avg_sq, out=max_exp_avg_sq)
+            exp_avg_sq = max_exp_avg_sq
+        return (exp_avg_sq.sqrt() / bias_correction2_sqrt).add_(eps)
 
     def step_param(self, p, group):
         if p.grad is None:
             return
         lr = group["lr"]
-        b1, b2 = group["beta1"], group["beta2"]
+        beta1, beta2 = group["betas"]
         eps = group["eps"]
-        wd = group["weight_decay"]
+        weight_decay = group["weight_decay"]
+        amsgrad = group["amsgrad"]
         grad = p.grad
         state = self.state[p]
+
         if "step" not in state:
-            state["step"] = 0
-            state["exp_avg"] = torch.zeros_like(p)
-            state["exp_avg_sq"] = torch.zeros_like(p)
+            self.init_state(state, p, amsgrad)
 
         state["step"] += 1
-        t = state["step"]
-        exp_avg, exp_avg_sq = state["exp_avg"], state["exp_avg_sq"]
+        step = state["step"]
+        exp_avg = state["exp_avg"]
+        exp_avg_sq = state["exp_avg_sq"]
 
-        alpha_val = 1 - b1
-        beta_val = 1 - b2
-        exp_avg.mul_(b1).add_(grad, alpha=alpha_val)
-        exp_avg_sq.mul_(b2).addcmul_(grad, grad, value=beta_val)
+        # Decoupled weight decay: shrink the parameter directly, not via the gradient.
+        p.mul_(1 - lr * weight_decay)
 
-        step_size = lr * (math.sqrt(1 - b2**t) / (1 - b1**t))
-        denom = exp_avg_sq.sqrt().add_(eps)
+        # Exponential moving averages of the gradient and its square.
+        exp_avg.lerp_(grad, 1 - beta1)
+        exp_avg_sq.mul_(beta2).addcmul_(grad, grad, value=1 - beta2)
 
-        neg_step_size = -step_size
-        p.mul_(1 - lr * wd)
-        p.addcdiv_(exp_avg, denom, value=neg_step_size)
+        bias_correction1 = 1 - beta1**step
+        bias_correction2 = 1 - beta2**step
+        bias_correction2_sqrt = math.sqrt(bias_correction2)
+        step_size = lr / bias_correction1
+
+        denom = self.denom(state, amsgrad, bias_correction2_sqrt, eps)
+        p.addcdiv_(exp_avg, denom, value=-step_size)
 
     def step_group(self, group):
         for p in group["params"]:
