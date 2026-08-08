@@ -4,9 +4,7 @@ import torch
 
 class AdamW(torch.optim.Optimizer):
     """
-    AdamW: Adam with decoupled weight decay (Loshchilov & Hutter, 2019).
-
-    Matches torch.optim.AdamW.
+    AdamW (Loshchilov & Hutter, 2019)
     """
 
     def __init__(

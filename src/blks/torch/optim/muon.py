@@ -4,10 +4,7 @@ import torch
 
 class Muon(torch.optim.Optimizer):
     """
-    Muon: momentum SGD whose 2D update is orthogonalized by Newton-Schulz iteration
-    (Jordan et al.). 
-    
-    Matches torch.optim.Muon.
+    Muon (Jordan et al.)
     """
 
     def __init__(
