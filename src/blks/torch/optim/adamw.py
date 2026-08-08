@@ -2,9 +2,9 @@ import math
 import torch
 
 
-class Adam(torch.optim.Optimizer):
+class AdamW(torch.optim.Optimizer):
     """
-    Adam optimizer implementation with decoupled weight decay (AdamW style).
+    AdamW optimizer: Adam with decoupled weight decay (Loshchilov & Hutter, 2019).
     """
 
     def __init__(self, params, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.0):

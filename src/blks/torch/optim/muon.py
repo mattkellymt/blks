@@ -1,6 +1,6 @@
 import math
 import torch
-from blks.torch.optim.adam import Adam
+from blks.torch.optim.adamw import AdamW
 
 
 class Muon(torch.optim.Optimizer):
@@ -17,14 +17,14 @@ class Muon(torch.optim.Optimizer):
         nesterov,
         eps,
         ns_steps,
-        adam_lr,
-        adam_betas,
-        adam_eps,
-        adam_wd,
+        adamw_lr,
+        adamw_betas,
+        adamw_eps,
+        adamw_wd,
     ):
         params_list = list(params)
         muon_params = [p for p in params_list if p.ndim == 2]
-        adam_params = [p for p in params_list if p.ndim != 2]
+        adamw_params = [p for p in params_list if p.ndim != 2]
         defaults = dict(
             lr=lr,
             weight_decay=weight_decay,
@@ -34,7 +34,7 @@ class Muon(torch.optim.Optimizer):
             ns_steps=ns_steps,
         )
         super().__init__(muon_params, defaults)
-        self.adam = Adam(adam_params, adam_lr, adam_betas, adam_eps, adam_wd)
+        self.adamw = AdamW(adamw_params, adamw_lr, adamw_betas, adamw_eps, adamw_wd)
 
     def step_newton_schulz(self, update, a, b, c):
         g = update @ update.T
@@ -88,4 +88,4 @@ class Muon(torch.optim.Optimizer):
     def step(self):
         for group in self.param_groups:
             self.step_group(group)
-        self.adam.step()
+        self.adamw.step()

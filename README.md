@@ -1,6 +1,4 @@
-[![License](https://img.shields.io/pypi/l/blks.svg)](https://github.com/mattkellymt/blks/blob/main/LICENSE)
-
-# blks
+# blks 
 
 Building blocks for AIML
 
@@ -41,3 +39,5 @@ import blks
 
 print(blks.__version__)
 ```
+
+[![License](https://img.shields.io/pypi/l/blks.svg)](https://github.com/mattkellymt/blks/blob/main/LICENSE)
