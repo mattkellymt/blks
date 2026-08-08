@@ -43,7 +43,3 @@ import blks
 
 print(blks.__version__)
 ```
-
-## License
-
-MIT
