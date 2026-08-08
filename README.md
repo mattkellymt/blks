@@ -2,7 +2,7 @@
 
 > Building blocks and shared utilities for Python projects.
 
-[![PyPI version](https://img.shields.io/pypi/v/blks.svg)](https://pypi.org/project/blks/)
+[![PyPI version](https://img.shields.io/pypi/v/blks.svg?cache=2)](https://pypi.org/project/blks/)
 [![License](https://img.shields.io/pypi/l/blks.svg)](https://github.com/mattkellymt/blks/blob/main/LICENSE)
 [![Python versions](https://img.shields.io/pypi/pyversions/blks.svg)](https://pypi.org/project/blks/)
 
