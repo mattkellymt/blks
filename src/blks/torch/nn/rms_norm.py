@@ -28,8 +28,7 @@ class RMSNorm(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         var = x.pow(2).mean(-1, keepdim=True)
+        out = x * torch.rsqrt(var + self.eps)
         if self.weight is not None:
-            out = (x * torch.rsqrt(var + self.eps)) * self.weight
-        else:
-            out = x * torch.rsqrt(var + self.eps)
+            out = out * self.weight
         return out
