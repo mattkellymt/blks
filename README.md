@@ -1,8 +1,8 @@
+[![License](https://img.shields.io/pypi/l/blks.svg)](https://github.com/mattkellymt/blks/blob/main/LICENSE)
+
 # blks
 
 Building blocks for AIML
-
-[![License](https://img.shields.io/pypi/l/blks.svg)](https://github.com/mattkellymt/blks/blob/main/LICENSE)
 
 ## Installation
 
