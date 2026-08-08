@@ -1,6 +1,6 @@
 [project]
 name = "blks"
-version = "2026.8.25"
+version = "2026.8.26"
 description = "Building blocks for AIML"
 readme = "README.md"
 license = "MIT"
