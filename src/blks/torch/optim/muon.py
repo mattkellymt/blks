@@ -5,10 +5,9 @@ import torch
 class Muon(torch.optim.Optimizer):
     """
     Muon: momentum SGD whose 2D update is orthogonalized by Newton-Schulz iteration
-    (Jordan et al.). Matches torch.optim.Muon in user-facing signature and numerics.
-
-    Muon only updates 2D parameters. Optimize other parameters (biases, embeddings,
-    heads) with a standard method such as AdamW.
+    (Jordan et al.). 
+    
+    Matches torch.optim.Muon.
     """
 
     def __init__(
@@ -34,12 +33,6 @@ class Muon(torch.optim.Optimizer):
             adjust_lr_fn=adjust_lr_fn,
         )
         super().__init__(params, defaults)
-        for group in self.param_groups:
-            for p in group["params"]:
-                if p.ndim != 2:
-                    raise ValueError(
-                        f"Muon only supports 2D parameters; got shape {tuple(p.shape)}"
-                    )
 
     def newton_schulz_iter(self, ortho, a, b, c):
         gram = ortho @ ortho.T
@@ -72,6 +65,10 @@ class Muon(torch.optim.Optimizer):
     def step_param(self, p, group):
         if p.grad is None:
             return
+        if p.ndim != 2:
+            raise ValueError(
+                f"Muon only supports 2D parameters; got shape {tuple(p.shape)}"
+            )
         lr = group["lr"]
         weight_decay = group["weight_decay"]
         momentum = group["momentum"]

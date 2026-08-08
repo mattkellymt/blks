@@ -6,7 +6,7 @@ class AdamW(torch.optim.Optimizer):
     """
     AdamW: Adam with decoupled weight decay (Loshchilov & Hutter, 2019).
 
-    Matches torch.optim.AdamW in user-facing signature and numerics.
+    Matches torch.optim.AdamW.
     """
 
     def __init__(
