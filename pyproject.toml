@@ -1,7 +1,7 @@
 [project]
 name = "blks"
-version = "2026.8.17"
-description = "Building blocks and shared utilities for Python projects"
+version = "2026.8.18"
+description = "Building blocks for AIML"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
