@@ -3,10 +3,6 @@ import torch.nn as nn
 
 
 class RMSNorm(nn.Module):
-    """
-    Root Mean Square Layer Normalization (RMSNorm)
-    """
-
     def __init__(
         self,
         normalized_shape: int | list[int] | tuple[int, ...],

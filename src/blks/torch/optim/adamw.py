@@ -3,10 +3,6 @@ import torch
 
 
 class AdamW(torch.optim.Optimizer):
-    """
-    AdamW (Loshchilov & Hutter, 2019)
-    """
-
     def __init__(
         self,
         params,

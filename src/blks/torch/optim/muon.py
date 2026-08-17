@@ -3,10 +3,6 @@ import torch
 
 
 class Muon(torch.optim.Optimizer):
-    """
-    Muon (Jordan et al.)
-    """
-
     def __init__(
         self,
         params,
