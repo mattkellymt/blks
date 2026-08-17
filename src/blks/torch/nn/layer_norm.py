@@ -31,6 +31,13 @@ class LayerNorm(nn.Module):
             self.register_parameter("bias", None)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return F.layer_norm(
-            x, self.shape, self.weight, self.bias, self.eps
-        )
+        mean = x.mean(-1, keepdim=True)
+        var = (x - mean).pow(2).mean(-1, keepdim=True)
+        out = (x - mean) * torch.rsqrt(var + self.eps)
+
+        if self.weight is not None:
+            out = out * self.weight
+        if self.bias is not None:
+            out = out + self.bias
+            
+        return out
