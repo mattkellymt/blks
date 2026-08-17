@@ -8,7 +8,7 @@ class LayerNorm(nn.Module):
         self,
         shape: int | list[int] | tuple[int, ...],
         eps: float | None = 1e-5,
-        elementwise_affine: bool = True,
+        scale: bool = True,
         bias: bool = True,
         device=None,
         dtype=None,
@@ -16,18 +16,18 @@ class LayerNorm(nn.Module):
         super().__init__()
         self.shape = shape
         self.eps = eps
-        self.elementwise_affine = elementwise_affine
+        self.scale = scale
 
-        if self.elementwise_affine:
+        if self.scale:
             self.weight = torch.ones(shape, device=device, dtype=dtype)
             self.weight = nn.Parameter(self.weight)
-            if bias:
-                self.bias = torch.zeros(shape, device=device, dtype=dtype)
-                self.bias = nn.Parameter(self.bias)
-            else:
-                self.register_parameter("bias", None)
         else:
             self.register_parameter("weight", None)
+
+        if bias:
+            self.bias = torch.zeros(shape, device=device, dtype=dtype)
+            self.bias = nn.Parameter(self.bias)
+        else:
             self.register_parameter("bias", None)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
