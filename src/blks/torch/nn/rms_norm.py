@@ -5,19 +5,19 @@ import torch.nn as nn
 class RMSNorm(nn.Module):
     def __init__(
         self,
-        normalized_shape: int | list[int] | tuple[int, ...],
+        shape: int | list[int] | tuple[int, ...],
         eps: float | None = 1e-6,
         elementwise_affine: bool = True,
         device=None,
         dtype=None,
     ):
         super().__init__()
-        self.normalized_shape = normalized_shape
+        self.shape = shape
         self.eps = eps
         self.elementwise_affine = elementwise_affine
 
         if self.elementwise_affine:
-            self.weight = torch.ones(normalized_shape, device=device, dtype=dtype)
+            self.weight = torch.ones(shape, device=device, dtype=dtype)
             self.weight = nn.Parameter(self.weight)
         else:
             self.register_parameter("weight", None)
