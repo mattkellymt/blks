@@ -38,7 +38,7 @@ def git_push(root_dir: Path, new_ver: str) -> None:
     subprocess.run(["git", "add", "."], cwd=root_dir, check=True)
     subprocess.run(["git", "commit", "-m", f"release: {new_ver}"], cwd=root_dir, check=True)
     subprocess.run(["git", "tag", tag_name], cwd=root_dir, check=True)
-    subprocess.run(["git", "push"], cwd=root_dir, check=True)
+    subprocess.run(["git", "push", "origin", "main"], cwd=root_dir, check=True)
     subprocess.run(["git", "push", "origin", tag_name], cwd=root_dir, check=True)
 
 
