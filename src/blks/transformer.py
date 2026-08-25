@@ -209,8 +209,6 @@ def main():
     model = Model(**config)
     load_model(model, weights_path, device)
 
-    # Muon updates 2D hidden weights; AdamW handles everything else
-    # (biases, norms, embeddings, head) -- the reference two-optimizer recipe.
     muon_params = [p for p in model.parameters() if p.ndim == 2]
     adamw_params = [p for p in model.parameters() if p.ndim != 2]
 

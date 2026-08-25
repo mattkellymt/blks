@@ -52,8 +52,10 @@ class Attention(nn.Module):
         q_gqa = q.view(batch_size, self.num_key_value_heads, n_rep, seq_len, self.head_dim)
         k_gqa = k.unsqueeze(2)
         v_gqa = v.unsqueeze(2)
+        attn_mask = None
+        dropout_p = 0.0
         is_causal = True
-        attn_out = F.scaled_dot_product_attention(q_gqa, k_gqa, v_gqa, None, 0.0, is_causal)
+        attn_out = F.scaled_dot_product_attention(q_gqa, k_gqa, v_gqa, attn_mask, dropout_p, is_causal)
         out = attn_out.reshape(batch_size, self.num_attention_heads, seq_len, self.head_dim)
         return out
 
