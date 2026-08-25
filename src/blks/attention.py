@@ -50,8 +50,8 @@ class Attention(nn.Module):
         batch_size, num_heads, seq_len, head_dim = q.shape
         n_rep = self.num_attention_heads // self.num_key_value_heads
         q_gqa = q.view(batch_size, self.num_key_value_heads, n_rep, seq_len, self.head_dim)
-        k_gqa = k.unsqueeze(2)
-        v_gqa = v.unsqueeze(2)
+        k_gqa = k.view(batch_size, self.num_key_value_heads, 1, seq_len, self.head_dim)
+        v_gqa = v.view(batch_size, self.num_key_value_heads, 1, seq_len, self.head_dim)
         attn_mask = None
         dropout_p = 0.0
         is_causal = True
