@@ -33,13 +33,14 @@ def update_version(current_version: str) -> str:
 
 
 def git_push(root_dir: Path, new_ver: str) -> None:
+    kwargs = {"cwd": root_dir, "check": True}
     tag_name = f"v{new_ver}"
 
-    subprocess.run(["git", "add", "."], cwd=root_dir, check=True)
-    subprocess.run(["git", "commit", "-m", f"release: {new_ver}"], cwd=root_dir, check=True)
-    subprocess.run(["git", "tag", tag_name], cwd=root_dir, check=True)
-    subprocess.run(["git", "push", "origin", "main"], cwd=root_dir, check=True)
-    subprocess.run(["git", "push", "origin", tag_name], cwd=root_dir, check=True)
+    subprocess.run(["git", "add", "."], **kwargs)
+    subprocess.run(["git", "commit", "-m", f"release: {new_ver}"], **kwargs)
+    subprocess.run(["git", "tag", tag_name], **kwargs)
+    subprocess.run(["git", "push", "origin", "main"], **kwargs)
+    subprocess.run(["git", "push", "origin", tag_name], **kwargs)
 
 
 def main():

@@ -47,12 +47,13 @@ class Muon(torch.optim.Optimizer):
 
     def adjust_lr(self, lr, adjust_lr_fn, shape):
         a, b = shape[:2]
-        if adjust_lr_fn is None or adjust_lr_fn == "original":
-            ratio = math.sqrt(max(1, a / b))
-        elif adjust_lr_fn == "match_rms_adamw":
-            ratio = 0.2 * math.sqrt(max(a, b))
-        else:
-            ratio = 1.0
+        match adjust_lr_fn:
+            case None | "original":
+                ratio = math.sqrt(max(1, a / b))
+            case "match_rms_adamw":
+                ratio = 0.2 * math.sqrt(max(a, b))
+            case _:
+                ratio = 1.0
         return lr * ratio
 
     def step_param(self, p, group):
