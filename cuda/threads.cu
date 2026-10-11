@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
     std::exit(EXIT_FAILURE);
   }
 
-  cudaDeviceProp prop;
+  cudaDeviceProp prop{};
   auto prop_err = cudaGetDeviceProperties(&prop, device_id);
   if (prop_err != cudaSuccess) {
     std::string msg = std::format("Error getting device properties: {}", cudaGetErrorString(prop_err));
@@ -35,26 +35,26 @@ int main(int argc, char* argv[]) {
     std::exit(EXIT_FAILURE);
   }
 
-  uint32_t grid_size;
+  uint32_t grid_size{};
   auto grid_size_err = parse_num(grid_size, args[1]);
   if (grid_size_err != EXIT_SUCCESS) {
     std::cerr << "Invalid grid size" << std::endl;
     std::exit(EXIT_FAILURE);
   }
-  auto grid_shape = dim3(grid_size, 1, 1);
+  auto grid_shape = dim3{grid_size, 1, 1};
   auto grid_shape_err = check_grid_shape(grid_shape, prop);
   if (grid_shape_err != EXIT_SUCCESS) {
     std::cerr << "Invalid grid shape" << std::endl;
     std::exit(EXIT_FAILURE);
   }
 
-  uint32_t block_size;
+  uint32_t block_size{};
   auto block_size_err = parse_num(block_size, args[2]);
   if (block_size_err != EXIT_SUCCESS) {
     std::cerr << "Invalid block size" << std::endl;
     std::exit(EXIT_FAILURE);
   }
-  auto block_shape = dim3(block_size, 1, 1);
+  auto block_shape = dim3{block_size, 1, 1};
   auto block_shape_err = check_block_shape(block_shape, prop);
   if (block_shape_err != EXIT_SUCCESS) {
     std::cerr << "Invalid block shape" << std::endl;
