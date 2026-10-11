@@ -51,12 +51,12 @@ static PyMethodDef LibCudaMethods[] = {
 
 static struct PyModuleDef libcudamodule = {
     PyModuleDef_HEAD_INIT,
-    "direct_cuda",
+    "mod_cuda",
     "",
     -1,
     LibCudaMethods
 };
 
-PyMODINIT_FUNC PyInit_direct_cuda(void) {
+PyMODINIT_FUNC PyInit_mod_cuda(void) {
     return PyModule_Create(&libcudamodule);
 }
