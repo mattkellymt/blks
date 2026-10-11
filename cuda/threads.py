@@ -19,14 +19,14 @@ if __name__ == '__main__':
 
     try:
         set_device(device_id)
-    except RuntimeError:
-        print("Error setting device", file=sys.stderr)
+    except RuntimeError as e:
+        print(e, file=sys.stderr)
         sys.exit(1)
 
     try:
         prop = get_prop(device_id)
-    except RuntimeError:
-        print("Error getting device properties", file=sys.stderr)
+    except RuntimeError as e:
+        print(e, file=sys.stderr)
         sys.exit(1)
 
     try:

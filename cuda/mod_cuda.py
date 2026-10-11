@@ -52,17 +52,20 @@ lib.c_run_kernel.restype  = c_int
 lib.c_get_error_string.argtypes = [c_int]
 lib.c_get_error_string.restype  = c_char_p
 
+def get_error_string(err: int) -> str:
+    return lib.c_get_error_string(err).decode('utf-8')
+
 def set_device(device_id: int) -> None:
-    if lib.c_set_device(device_id) != 0:
-        raise RuntimeError("Error setting device")
+    if (err := lib.c_set_device(device_id)) != 0:
+        raise RuntimeError(f"Error setting device: {get_error_string(err)}")
 
 def welcome() -> None:
     lib.c_welcome()
 
 def get_prop(device_id: int) -> DeviceProp:
     prop = DeviceProp()
-    if lib.c_get_prop(byref(prop), device_id) != 0:
-        raise RuntimeError("Error getting device properties")
+    if (err := lib.c_get_prop(byref(prop), device_id)) != 0:
+        raise RuntimeError(f"Error getting device properties: {get_error_string(err)}")
     return prop
 
 def parse_u32(s: str) -> int:
@@ -80,6 +83,5 @@ def check_block_shape(block_shape: Dim3, prop: DeviceProp) -> None:
         raise ValueError("Invalid block shape")
 
 def run_kernel(grid_shape: Dim3, block_shape: Dim3) -> None:
-    err = lib.c_run_kernel(grid_shape, block_shape)
-    if err != 0:
-        raise RuntimeError(f"Kernel failed: {lib.c_get_error_string(err).decode('utf-8')}")
+    if (err := lib.c_run_kernel(grid_shape, block_shape)) != 0:
+        raise RuntimeError(f"Kernel failed: {get_error_string(err)}")

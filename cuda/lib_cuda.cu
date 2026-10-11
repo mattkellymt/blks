@@ -1,6 +1,5 @@
 #include <cstdint>
 #include <string_view>
-#include "get_prop.cuh"
 #include "lib_cuda.cuh"
 #include "parse_num.hpp"
 #include "run_kernel.cuh"
@@ -21,8 +20,8 @@ extern "C" {
     return sizeof(cudaDeviceProp);
   }
 
-  int c_get_prop(cudaDeviceProp* prop, uint32_t device_id) {
-    return get_prop(*prop, device_id);
+  cudaError_t c_get_prop(cudaDeviceProp* prop, uint32_t device_id) {
+    return cudaGetDeviceProperties(prop, device_id);
   }
 
   int c_parse_u32(uint32_t* val, const char* str) {

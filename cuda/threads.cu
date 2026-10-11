@@ -4,7 +4,6 @@
 #include <iostream>
 #include <span>
 #include <string>
-#include "get_prop.cuh"
 #include "parse_num.hpp"
 #include "set_block_shape.cuh"
 #include "set_grid_shape.cuh"
@@ -23,14 +22,16 @@ int main(int argc, char* argv[]) {
 
   auto set_device_err = cudaSetDevice(device_id);
   if (set_device_err != cudaSuccess) {
-    std::cerr << "Error setting device" << std::endl;
+    std::string msg = std::format("Error setting device: {}", cudaGetErrorString(set_device_err));
+    std::cerr << msg << std::endl;
     std::exit(EXIT_FAILURE);
   }
 
   cudaDeviceProp prop;
-  auto prop_err = get_prop(prop, device_id);
-  if (prop_err != EXIT_SUCCESS) {
-    std::cerr << "Error getting device properties" << std::endl;
+  auto prop_err = cudaGetDeviceProperties(&prop, device_id);
+  if (prop_err != cudaSuccess) {
+    std::string msg = std::format("Error getting device properties: {}", cudaGetErrorString(prop_err));
+    std::cerr << msg << std::endl;
     std::exit(EXIT_FAILURE);
   }
 
