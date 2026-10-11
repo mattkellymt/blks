@@ -42,10 +42,20 @@ static PyObject* py_parse_f32(PyObject* self, PyObject* args) {
     return PyFloat_FromDouble(res.f32);
 }
 
+static PyObject* py_launch_threads(PyObject* self, PyObject* args) {
+    unsigned int grid_size;
+    unsigned int block_size;
+    if (!PyArg_ParseTuple(args, "II", &grid_size, &block_size)) {
+        return nullptr;
+    }
+    return PyLong_FromLong(launch_threads(grid_size, block_size));
+}
+
 static PyMethodDef LibCudaMethods[] = {
     {"parse_u32", py_parse_u32, METH_VARARGS, ""},
     {"parse_i32",  py_parse_i32,  METH_VARARGS, ""},
     {"parse_f32",  py_parse_f32,  METH_VARARGS, ""},
+    {"launch_threads", py_launch_threads, METH_VARARGS, ""},
     {nullptr, nullptr, 0, nullptr}
 };
 
