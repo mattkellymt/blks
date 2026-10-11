@@ -6,11 +6,11 @@
 #include <cuda_runtime.h>
 #include "parse_num.hpp"
 
-inline int check_block_shape(uint32_t x, uint32_t y, uint32_t z, const cudaDeviceProp& prop) {
-  if (x == 0 || y == 0 || z == 0) {
+inline int check_block_shape(dim3& block_shape, const cudaDeviceProp& prop) {
+  if (block_shape.x == 0 || block_shape.y == 0 || block_shape.z == 0) {
     return EXIT_FAILURE;
   }
-  auto threads_per_block = x * y * z;
+  auto threads_per_block = block_shape.x * block_shape.y * block_shape.z;
   if (threads_per_block > prop.maxThreadsPerBlock) {
     return EXIT_FAILURE;
   }
