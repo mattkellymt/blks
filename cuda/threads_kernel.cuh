@@ -1,7 +1,7 @@
 #pragma once
+#include <cstdint>
 #include <cstdio>
 #include "threads_device.cuh"
-#include "threads_homogeneous.cuh"
 
 __global__
 void kernel() {

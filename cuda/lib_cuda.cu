@@ -1,25 +1,47 @@
 #include <cstdint>
 #include <string_view>
+#include "get_prop.cuh"
 #include "lib_cuda.cuh"
-#include "threads_run.cuh"
+#include "parse_num.hpp"
+#include "run_kernel.cuh"
+#include "set_block_shape.cuh"
+#include "set_grid_shape.cuh"
+#include "threads_host.cuh"
 
 extern "C" {
-  pair parse_u32(const char* str) {
-    auto [val, ec] = parse_num<uint32_t>(std::string_view(str));
-    return pair{.u32 = val, .ec = ec};
+  cudaError_t c_set_device(uint32_t device_id) {
+    return cudaSetDevice(device_id);
   }
 
-  pair parse_i32(const char* str) {
-    auto [val, ec] = parse_num<int32_t>(std::string_view(str));
-    return pair{.i32 = val, .ec = ec};
+  void c_welcome() {
+    welcome();
   }
 
-  pair parse_f32(const char* str) {
-    auto [val, ec] = parse_num<float>(std::string_view(str));
-    return pair{.f32 = val, .ec = ec};
+  size_t c_prop_size() {
+    return sizeof(cudaDeviceProp);
   }
 
-  int launch_threads(uint32_t grid_size, uint32_t block_size) {
-    return run_threads(grid_size, block_size);
+  int c_get_prop(cudaDeviceProp* prop, uint32_t device_id) {
+    return get_prop(*prop, device_id);
+  }
+
+  int c_parse_u32(uint32_t* val, const char* str) {
+    return parse_num(*val, std::string_view(str));
+  }
+
+  int c_check_grid_shape(dim3 grid_shape, const cudaDeviceProp* prop) {
+    return check_grid_shape(grid_shape, *prop);
+  }
+
+  int c_check_block_shape(dim3 block_shape, const cudaDeviceProp* prop) {
+    return check_block_shape(block_shape, *prop);
+  }
+
+  cudaError_t c_run_kernel(dim3 grid_shape, dim3 block_shape) {
+    return run_kernel(grid_shape, block_shape);
+  }
+
+  const char* c_get_error_string(cudaError_t err) {
+    return cudaGetErrorString(err);
   }
 }

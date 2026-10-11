@@ -4,11 +4,16 @@
 #include <iostream>
 #include <span>
 #include <string>
+#include "get_prop.cuh"
 #include "parse_num.hpp"
-#include "threads_run.cuh"
+#include "set_block_shape.cuh"
+#include "set_grid_shape.cuh"
+#include "run_kernel.cuh"
+#include "threads_host.cuh"
 
 int main(int argc, char* argv[]) {
   std::span<char*> args(argv, argc);
+  constexpr uint32_t device_id = 0;
 
   if (args.size() != 3) {
     std::string msg = std::format("Usage: {} <grid size> <block size>", args[0]);
@@ -16,17 +21,52 @@ int main(int argc, char* argv[]) {
     std::exit(EXIT_FAILURE);
   }
 
-  auto [grid_size, grid_size_err] = parse_num<uint32_t>(args[1]);
+  auto set_device_err = cudaSetDevice(device_id);
+  if (set_device_err != cudaSuccess) {
+    std::cerr << "Error setting device" << std::endl;
+    std::exit(EXIT_FAILURE);
+  }
+
+  cudaDeviceProp prop;
+  auto prop_err = get_prop(prop, device_id);
+  if (prop_err != EXIT_SUCCESS) {
+    std::cerr << "Error getting device properties" << std::endl;
+    std::exit(EXIT_FAILURE);
+  }
+
+  uint32_t grid_size;
+  auto grid_size_err = parse_num(grid_size, args[1]);
   if (grid_size_err != EXIT_SUCCESS) {
     std::cerr << "Invalid grid size" << std::endl;
     std::exit(EXIT_FAILURE);
   }
+  auto grid_shape = dim3(grid_size, 1, 1);
+  auto grid_shape_err = check_grid_shape(grid_shape, prop);
+  if (grid_shape_err != EXIT_SUCCESS) {
+    std::cerr << "Invalid grid shape" << std::endl;
+    std::exit(EXIT_FAILURE);
+  }
 
-  auto [block_size, block_size_err] = parse_num<uint32_t>(args[2]);
+  uint32_t block_size;
+  auto block_size_err = parse_num(block_size, args[2]);
   if (block_size_err != EXIT_SUCCESS) {
     std::cerr << "Invalid block size" << std::endl;
     std::exit(EXIT_FAILURE);
   }
+  auto block_shape = dim3(block_size, 1, 1);
+  auto block_shape_err = check_block_shape(block_shape, prop);
+  if (block_shape_err != EXIT_SUCCESS) {
+    std::cerr << "Invalid block shape" << std::endl;
+    std::exit(EXIT_FAILURE);
+  }
 
-  return run_threads(grid_size, block_size);
+  welcome();
+  auto kernel_err = run_kernel(grid_shape, block_shape);
+  if (kernel_err != cudaSuccess) {
+    std::string msg = std::format("Kernel failed: {}", cudaGetErrorString(kernel_err));
+    std::cerr << msg << std::endl;
+    std::exit(EXIT_FAILURE);
+  }
+
+  return EXIT_SUCCESS;
 }

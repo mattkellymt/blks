@@ -1,0 +1,85 @@
+import ctypes
+from ctypes import byref, c_byte, c_char_p, c_int, c_size_t, c_uint32, POINTER, Structure
+from pathlib import Path
+
+class Dim3(Structure):
+    _fields_ = [
+        ("x", c_uint32),
+        ("y", c_uint32),
+        ("z", c_uint32)
+    ]
+
+    def __init__(self, x: int = 1, y: int = 1, z: int = 1):
+        super().__init__(x, y, z)
+
+    def __repr__(self) -> str:
+        return f"Dim3({self.x}, {self.y}, {self.z})"
+
+try:
+    lib = ctypes.CDLL(str(Path(__file__).parent / 'lib_cuda.so'))
+except OSError as e:
+    raise RuntimeError("Failed to load lib_cuda.so") from e
+
+lib.c_prop_size.argtypes = []
+lib.c_prop_size.restype  = c_size_t
+
+class DeviceProp(Structure):
+    _fields_ = [
+        ("data", c_byte * lib.c_prop_size())
+    ]
+
+lib.c_set_device.argtypes = [c_uint32]
+lib.c_set_device.restype  = c_int
+
+lib.c_welcome.argtypes = []
+lib.c_welcome.restype  = None
+
+lib.c_get_prop.argtypes = [POINTER(DeviceProp), c_uint32]
+lib.c_get_prop.restype  = c_int
+
+lib.c_parse_u32.argtypes = [POINTER(c_uint32), c_char_p]
+lib.c_parse_u32.restype  = c_int
+
+lib.c_check_grid_shape.argtypes = [Dim3, POINTER(DeviceProp)]
+lib.c_check_grid_shape.restype  = c_int
+
+lib.c_check_block_shape.argtypes = [Dim3, POINTER(DeviceProp)]
+lib.c_check_block_shape.restype  = c_int
+
+lib.c_run_kernel.argtypes = [Dim3, Dim3]
+lib.c_run_kernel.restype  = c_int
+
+lib.c_get_error_string.argtypes = [c_int]
+lib.c_get_error_string.restype  = c_char_p
+
+def set_device(device_id: int) -> None:
+    if lib.c_set_device(device_id) != 0:
+        raise RuntimeError("Error setting device")
+
+def welcome() -> None:
+    lib.c_welcome()
+
+def get_prop(device_id: int) -> DeviceProp:
+    prop = DeviceProp()
+    if lib.c_get_prop(byref(prop), device_id) != 0:
+        raise RuntimeError("Error getting device properties")
+    return prop
+
+def parse_u32(s: str) -> int:
+    val = c_uint32()
+    if lib.c_parse_u32(byref(val), s.encode('utf-8')) != 0:
+        raise ValueError("Failed to parse input as uint32_t")
+    return val.value
+
+def check_grid_shape(grid_shape: Dim3, prop: DeviceProp) -> None:
+    if lib.c_check_grid_shape(grid_shape, byref(prop)) != 0:
+        raise ValueError("Invalid grid shape")
+
+def check_block_shape(block_shape: Dim3, prop: DeviceProp) -> None:
+    if lib.c_check_block_shape(block_shape, byref(prop)) != 0:
+        raise ValueError("Invalid block shape")
+
+def run_kernel(grid_shape: Dim3, block_shape: Dim3) -> None:
+    err = lib.c_run_kernel(grid_shape, block_shape)
+    if err != 0:
+        raise RuntimeError(f"Kernel failed: {lib.c_get_error_string(err).decode('utf-8')}")
