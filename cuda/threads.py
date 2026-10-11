@@ -2,8 +2,8 @@ import sys
 
 from mod_cuda import (
     Dim3,
-    check_block_shape,
-    check_grid_shape,
+    check_block,
+    check_grid,
     get_prop,
     parse_u32,
     run_kernel,
@@ -23,11 +23,11 @@ if __name__ == '__main__':
 
     grid_size = parse_u32(sys.argv[1])
     grid_shape = Dim3(grid_size, 1, 1)
-    check_grid_shape(grid_shape, prop)
+    check_grid(grid_shape, prop)
 
     block_size = parse_u32(sys.argv[2])
     block_shape = Dim3(block_size, 1, 1)
-    check_block_shape(block_shape, prop)
+    check_block(block_shape, prop)
 
     welcome()
     run_kernel(grid_shape, block_shape)

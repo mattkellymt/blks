@@ -49,11 +49,11 @@ lib.c_get_prop.restype  = c_int
 lib.c_parse_u32.argtypes = [POINTER(c_uint32), c_char_p]
 lib.c_parse_u32.restype  = c_int
 
-lib.c_check_grid_shape.argtypes = [Dim3, POINTER(DeviceProp)]
-lib.c_check_grid_shape.restype  = c_int
+lib.c_check_grid.argtypes = [Dim3, POINTER(DeviceProp)]
+lib.c_check_grid.restype  = c_int
 
-lib.c_check_block_shape.argtypes = [Dim3, POINTER(DeviceProp)]
-lib.c_check_block_shape.restype  = c_int
+lib.c_check_block.argtypes = [Dim3, POINTER(DeviceProp)]
+lib.c_check_block.restype  = c_int
 
 lib.c_run_kernel.argtypes = [Dim3, Dim3]
 lib.c_run_kernel.restype  = c_int
@@ -83,12 +83,12 @@ def parse_u32(s: str) -> int:
         raise ValueError("Failed to parse input as uint32_t")
     return val.value
 
-def check_grid_shape(grid_shape: Dim3, prop: DeviceProp) -> None:
-    if lib.c_check_grid_shape(grid_shape, byref(prop)) != 0:
+def check_grid(grid_shape: Dim3, prop: DeviceProp) -> None:
+    if lib.c_check_grid(grid_shape, byref(prop)) != 0:
         raise ValueError("Invalid grid shape")
 
-def check_block_shape(block_shape: Dim3, prop: DeviceProp) -> None:
-    if lib.c_check_block_shape(block_shape, byref(prop)) != 0:
+def check_block(block_shape: Dim3, prop: DeviceProp) -> None:
+    if lib.c_check_block(block_shape, byref(prop)) != 0:
         raise ValueError("Invalid block shape")
 
 def run_kernel(grid_shape: Dim3, block_shape: Dim3) -> None:

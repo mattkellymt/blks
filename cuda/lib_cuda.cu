@@ -2,10 +2,10 @@
 #include <cstdint>
 #include <string_view>
 #include <cuda_runtime.h>
+#include "check_block.cuh"
+#include "check_grid.cuh"
 #include "parse_num.hpp"
 #include "run_kernel.cuh"
-#include "set_block_shape.cuh"
-#include "set_grid_shape.cuh"
 #include "threads_host.cuh"
 
 extern "C" {
@@ -29,12 +29,12 @@ extern "C" {
     return parse_num(*val, std::string_view(str));
   }
 
-  int c_check_grid_shape(dim3 grid_shape, const cudaDeviceProp* prop) {
-    return check_grid_shape(grid_shape, *prop);
+  int c_check_grid(dim3 grid_shape, const cudaDeviceProp* prop) {
+    return check_grid(grid_shape, *prop);
   }
 
-  int c_check_block_shape(dim3 block_shape, const cudaDeviceProp* prop) {
-    return check_block_shape(block_shape, *prop);
+  int c_check_block(dim3 block_shape, const cudaDeviceProp* prop) {
+    return check_block(block_shape, *prop);
   }
 
   cudaError_t c_run_kernel(dim3 grid_shape, dim3 block_shape) {

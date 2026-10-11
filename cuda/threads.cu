@@ -5,10 +5,10 @@
 #include <span>
 #include <string>
 #include <cuda_runtime.h>
+#include "check_block.cuh"
+#include "check_grid.cuh"
 #include "parse_num.hpp"
 #include "run_kernel.cuh"
-#include "set_block_shape.cuh"
-#include "set_grid_shape.cuh"
 #include "threads_host.cuh"
 
 int main(int argc, char* argv[]) {
@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
     std::exit(EXIT_FAILURE);
   }
   auto grid_shape = dim3{grid_size, 1, 1};
-  auto grid_shape_err = check_grid_shape(grid_shape, prop);
+  auto grid_shape_err = check_grid(grid_shape, prop);
   if (grid_shape_err != EXIT_SUCCESS) {
     std::cerr << "Invalid grid shape" << std::endl;
     std::exit(EXIT_FAILURE);
@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
     std::exit(EXIT_FAILURE);
   }
   auto block_shape = dim3{block_size, 1, 1};
-  auto block_shape_err = check_block_shape(block_shape, prop);
+  auto block_shape_err = check_block(block_shape, prop);
   if (block_shape_err != EXIT_SUCCESS) {
     std::cerr << "Invalid block shape" << std::endl;
     std::exit(EXIT_FAILURE);
