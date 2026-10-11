@@ -1,6 +1,7 @@
+#include <cstddef>
 #include <cstdint>
 #include <string_view>
-#include "lib_cuda.cuh"
+#include <cuda_runtime.h>
 #include "parse_num.hpp"
 #include "run_kernel.cuh"
 #include "set_block_shape.cuh"
