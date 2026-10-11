@@ -17,45 +17,16 @@ if __name__ == '__main__':
         print(f"Usage: {sys.argv[0]} <grid size> <block size>", file=sys.stderr)
         sys.exit(1)
 
-    try:
-        set_device(device_id)
-    except RuntimeError as e:
-        print(e, file=sys.stderr)
-        sys.exit(1)
+    set_device(device_id)
+    prop = get_prop(device_id)
 
-    try:
-        prop = get_prop(device_id)
-    except RuntimeError as e:
-        print(e, file=sys.stderr)
-        sys.exit(1)
-
-    try:
-        grid_size = parse_u32(sys.argv[1])
-    except ValueError:
-        print("Invalid grid size", file=sys.stderr)
-        sys.exit(1)
+    grid_size = parse_u32(sys.argv[1])
     grid_shape = Dim3(grid_size, 1, 1)
-    try:
-        check_grid_shape(grid_shape, prop)
-    except ValueError:
-        print("Invalid grid shape", file=sys.stderr)
-        sys.exit(1)
+    check_grid_shape(grid_shape, prop)
 
-    try:
-        block_size = parse_u32(sys.argv[2])
-    except ValueError:
-        print("Invalid block size", file=sys.stderr)
-        sys.exit(1)
+    block_size = parse_u32(sys.argv[2])
     block_shape = Dim3(block_size, 1, 1)
-    try:
-        check_block_shape(block_shape, prop)
-    except ValueError:
-        print("Invalid block shape", file=sys.stderr)
-        sys.exit(1)
+    check_block_shape(block_shape, prop)
 
     welcome()
-    try:
-        run_kernel(grid_shape, block_shape)
-    except RuntimeError as e:
-        print(e, file=sys.stderr)
-        sys.exit(1)
+    run_kernel(grid_shape, block_shape)
