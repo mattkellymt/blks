@@ -20,43 +20,55 @@ int main(int argc, char* argv[]) {
     std::exit(EXIT_FAILURE);
   }
 
-  auto err1 = cudaSetDevice(device_id);
-  if (err1 != cudaSuccess) {
+  auto set_device_err = cudaSetDevice(device_id);
+  if (set_device_err != cudaSuccess) {
     std::cerr << "Error setting device" << std::endl;
     std::exit(EXIT_FAILURE);
   }
 
-  auto [prop, err2] = get_prop(device_id);
-  if (err2 != EXIT_SUCCESS) {
+  auto [prop, prop_err] = get_prop(device_id);
+  if (prop_err != EXIT_SUCCESS) {
     std::cerr << "Error getting device properties" << std::endl;
     std::exit(EXIT_FAILURE);
   }
 
-  auto [grid_shape, err3] = set_grid_shape(args[1], "1", "1", prop);
-  if (err3 != EXIT_SUCCESS) {
-    std::cerr << "Invalid grid shape setup" << std::endl;
+  auto [grid_size, grid_size_err] = parse_num<uint32_t>(args[1]);
+  if (grid_size_err != EXIT_SUCCESS) {
+    std::cerr << "Invalid grid size" << std::endl;
+    std::exit(EXIT_FAILURE);
+  }
+  auto grid_shape = dim3(grid_size, 1, 1);
+  auto grid_shape_err = check_grid_shape(grid_shape, prop);
+  if (grid_shape_err != EXIT_SUCCESS) {
+    std::cerr << "Invalid grid shape" << std::endl;
     std::exit(EXIT_FAILURE);
   }
 
-  auto [block_shape, err4] = set_block_shape(args[2], "1", "1", prop);
-  if (err4 != EXIT_SUCCESS) {
-    std::cerr << "Invalid block shape setup" << std::endl;
+  auto [block_size, block_size_err] = parse_num<uint32_t>(args[2]);
+  if (block_size_err != EXIT_SUCCESS) {
+    std::cerr << "Invalid block size" << std::endl;
+    std::exit(EXIT_FAILURE);
+  }
+  auto block_shape = dim3(block_size, 1, 1);
+  auto block_shape_err = check_block_shape(block_shape, prop);
+  if (block_shape_err != EXIT_SUCCESS) {
+    std::cerr << "Invalid block shape" << std::endl;
     std::exit(EXIT_FAILURE);
   }
 
   welcome();
   kernel<<<grid_shape, block_shape>>>();
 
-  auto err5 = cudaGetLastError();
-  if (err5 != cudaSuccess) {
-    std::string msg = std::format("Kernel launch failed: {}", cudaGetErrorString(err5));
+  auto kernel_err = cudaGetLastError();
+  if (kernel_err != cudaSuccess) {
+    std::string msg = std::format("Kernel launch failed: {}", cudaGetErrorString(kernel_err));
     std::cerr << msg << std::endl;
     std::exit(EXIT_FAILURE);
   }
 
-  auto err6 = cudaDeviceSynchronize();
-  if (err6 != cudaSuccess) {
-    std::string msg = std::format("cudaDeviceSynchronize failed: {}", cudaGetErrorString(err6));
+  auto sync_err = cudaDeviceSynchronize();
+  if (sync_err != cudaSuccess) {
+    std::string msg = std::format("cudaDeviceSynchronize failed: {}", cudaGetErrorString(sync_err));
     std::cerr << msg << std::endl;
     std::exit(EXIT_FAILURE);
   }

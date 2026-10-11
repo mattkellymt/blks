@@ -16,20 +16,3 @@ inline int check_block_shape(uint32_t x, uint32_t y, uint32_t z, const cudaDevic
   }
   return EXIT_SUCCESS;
 }
-
-inline std::tuple<dim3, int> set_block_shape(uint32_t x, uint32_t y, uint32_t z, const cudaDeviceProp& prop) {
-  if (check_block_shape(x, y, z, prop) != EXIT_SUCCESS) {
-    return {dim3{}, EXIT_FAILURE};
-  }
-  return {dim3(x, y, z), EXIT_SUCCESS};
-}
-
-inline std::tuple<dim3, int> set_block_shape(std::string_view xstr, std::string_view ystr, std::string_view zstr, const cudaDeviceProp& prop) {
-  auto [x, err1] = parse_num<uint32_t>(xstr);
-  auto [y, err2] = parse_num<uint32_t>(ystr);
-  auto [z, err3] = parse_num<uint32_t>(zstr);
-  if (err1 != EXIT_SUCCESS || err2 != EXIT_SUCCESS || err3 != EXIT_SUCCESS) {
-    return {dim3{}, EXIT_FAILURE};
-  }
-  return set_block_shape(x, y, z, prop);
-}
