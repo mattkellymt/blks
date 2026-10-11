@@ -5,7 +5,6 @@ from mod_cuda import (
     check_block,
     check_grid,
     get_prop,
-    parse_u32,
     run_kernel,
     set_device,
     welcome,
@@ -21,11 +20,11 @@ if __name__ == '__main__':
     set_device(device_id)
     prop = get_prop(device_id)
 
-    grid_size = parse_u32(sys.argv[1])
+    grid_size = int(sys.argv[1])
     grid_shape = Dim3(grid_size, 1, 1)
     check_grid(grid_shape, prop)
 
-    block_size = parse_u32(sys.argv[2])
+    block_size = int(sys.argv[2])
     block_shape = Dim3(block_size, 1, 1)
     check_block(block_shape, prop)
 

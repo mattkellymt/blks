@@ -1,10 +1,8 @@
 #include <cstddef>
 #include <cstdint>
-#include <string_view>
 #include <cuda_runtime.h>
 #include "check_block.cuh"
 #include "check_grid.cuh"
-#include "parse_num.hpp"
 #include "run_kernel.cuh"
 #include "threads_host.cuh"
 
@@ -23,10 +21,6 @@ extern "C" {
 
   cudaError_t c_get_prop(cudaDeviceProp* prop, uint32_t device_id) {
     return cudaGetDeviceProperties(prop, device_id);
-  }
-
-  int c_parse_u32(uint32_t* val, const char* str) {
-    return parse_num(*val, std::string_view(str));
   }
 
   int c_check_grid(dim3 grid_shape, const cudaDeviceProp* prop) {

@@ -46,9 +46,6 @@ lib.c_welcome.restype  = None
 lib.c_get_prop.argtypes = [POINTER(DeviceProp), c_uint32]
 lib.c_get_prop.restype  = c_int
 
-lib.c_parse_u32.argtypes = [POINTER(c_uint32), c_char_p]
-lib.c_parse_u32.restype  = c_int
-
 lib.c_check_grid.argtypes = [Dim3, POINTER(DeviceProp)]
 lib.c_check_grid.restype  = c_int
 
@@ -76,12 +73,6 @@ def get_prop(device_id: int) -> DeviceProp:
     if (err := lib.c_get_prop(byref(prop), device_id)) != 0:
         raise RuntimeError(f"Error getting device properties: {get_error_string(err)}")
     return prop
-
-def parse_u32(s: str) -> int:
-    val = c_uint32()
-    if lib.c_parse_u32(byref(val), s.encode('utf-8')) != 0:
-        raise ValueError("Failed to parse input as uint32_t")
-    return val.value
 
 def check_grid(grid_shape: Dim3, prop: DeviceProp) -> None:
     if lib.c_check_grid(grid_shape, byref(prop)) != 0:
