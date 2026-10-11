@@ -1,5 +1,14 @@
-import ctypes
-from ctypes import byref, c_byte, c_char_p, c_int, c_size_t, c_uint32, POINTER, Structure
+from ctypes import (
+    CDLL,
+    POINTER,
+    Structure,
+    byref,
+    c_byte,
+    c_char_p,
+    c_int,
+    c_size_t,
+    c_uint32,
+)
 from pathlib import Path
 
 class Dim3(Structure):
@@ -16,7 +25,7 @@ class Dim3(Structure):
         return f"Dim3({self.x}, {self.y}, {self.z})"
 
 try:
-    lib = ctypes.CDLL(str(Path(__file__).parent / 'lib_cuda.so'))
+    lib = CDLL(str(Path(__file__).parent / 'lib_cuda.so'))
 except OSError as e:
     raise RuntimeError("Failed to load lib_cuda.so") from e
 

@@ -4,10 +4,11 @@
 #include <iostream>
 #include <span>
 #include <string>
+#include <cuda_runtime.h>
 #include "parse_num.hpp"
+#include "run_kernel.cuh"
 #include "set_block_shape.cuh"
 #include "set_grid_shape.cuh"
-#include "run_kernel.cuh"
 #include "threads_host.cuh"
 
 int main(int argc, char* argv[]) {

@@ -1,8 +1,9 @@
 import sys
+
 from mod_cuda import (
+    Dim3,
     check_block_shape,
     check_grid_shape,
-    Dim3,
     get_prop,
     parse_u32,
     run_kernel,
