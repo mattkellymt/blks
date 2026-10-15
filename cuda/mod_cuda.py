@@ -20,6 +20,8 @@ class Dim3(Structure):
     ]
 
     def __init__(self, x: int = 1, y: int = 1, z: int = 1):
+        if x < 0 or y < 0 or z < 0:
+            raise ValueError(f"Invalid Dim3({x}, {y}, {z}): dimensions must be non-negative")
         super().__init__(x, y, z)
 
     def __repr__(self) -> str:
