@@ -2,6 +2,6 @@
 #include <cstdint>
 
 __device__
-uint32_t get_thread() {
+inline int32_t get_thread() {
   return blockIdx.x * blockDim.x + threadIdx.x;
 }
