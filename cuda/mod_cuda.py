@@ -6,16 +6,16 @@ from ctypes import (
     c_byte,
     c_char_p,
     c_int,
-    c_int32,
     c_size_t,
+    c_uint32,
 )
 from pathlib import Path
 
 class Dim3(Structure):
     _fields_ = [
-        ("x", c_int32),
-        ("y", c_int32),
-        ("z", c_int32)
+        ("x", c_uint32),
+        ("y", c_uint32),
+        ("z", c_uint32)
     ]
 
     def __init__(self, x: int = 1, y: int = 1, z: int = 1):
@@ -37,13 +37,13 @@ class DeviceProp(Structure):
         ("data", c_byte * lib.c_prop_size())
     ]
 
-lib.c_set_device.argtypes = [c_int32]
+lib.c_set_device.argtypes = [c_uint32]
 lib.c_set_device.restype  = c_int
 
 lib.c_welcome.argtypes = []
 lib.c_welcome.restype  = None
 
-lib.c_get_prop.argtypes = [POINTER(DeviceProp), c_int32]
+lib.c_get_prop.argtypes = [POINTER(DeviceProp), c_uint32]
 lib.c_get_prop.restype  = c_int
 
 lib.c_check_grid.argtypes = [Dim3, POINTER(DeviceProp)]

@@ -4,7 +4,7 @@
 #include "threads_device.cuh"
 
 __global__
-static void kernel() {
-  int32_t thread = get_thread();
-  printf("Hello from thread %d!\n", thread);
+void kernel() {
+  uint32_t thread = get_thread();
+  printf("Hello from thread %u!\n", thread);
 }
