@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <format>
 #include <iostream>
 #include <span>
@@ -38,27 +39,31 @@ int main(int argc, char* argv[]) {
 
   uint32_t grid_size{};
   auto grid_size_err = parse_num(grid_size, args[1]);
-  if (grid_size_err != EXIT_SUCCESS) {
-    std::cerr << "Invalid grid size" << std::endl;
+  if (grid_size_err != 0) {
+    std::string msg = std::format("Invalid grid size: {}", std::strerror(grid_size_err));
+    std::cerr << msg << std::endl;
     std::exit(EXIT_FAILURE);
   }
   auto grid_shape = dim3{grid_size, 1, 1};
   auto grid_shape_err = check_grid(grid_shape, prop);
-  if (grid_shape_err != EXIT_SUCCESS) {
-    std::cerr << "Invalid grid shape" << std::endl;
+  if (grid_shape_err != 0) {
+    std::string msg = std::format("Invalid grid shape: {}", std::strerror(grid_shape_err));
+    std::cerr << msg << std::endl;
     std::exit(EXIT_FAILURE);
   }
 
   uint32_t block_size{};
   auto block_size_err = parse_num(block_size, args[2]);
-  if (block_size_err != EXIT_SUCCESS) {
-    std::cerr << "Invalid block size" << std::endl;
+  if (block_size_err != 0) {
+    std::string msg = std::format("Invalid block size: {}", std::strerror(block_size_err));
+    std::cerr << msg << std::endl;
     std::exit(EXIT_FAILURE);
   }
   auto block_shape = dim3{block_size, 1, 1};
   auto block_shape_err = check_block(block_shape, prop);
-  if (block_shape_err != EXIT_SUCCESS) {
-    std::cerr << "Invalid block shape" << std::endl;
+  if (block_shape_err != 0) {
+    std::string msg = std::format("Invalid block shape: {}", std::strerror(block_shape_err));
+    std::cerr << msg << std::endl;
     std::exit(EXIT_FAILURE);
   }
 

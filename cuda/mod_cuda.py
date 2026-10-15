@@ -1,3 +1,4 @@
+import os
 from ctypes import (
     CDLL,
     POINTER,
@@ -75,12 +76,12 @@ def get_prop(device_id: int) -> DeviceProp:
     return prop
 
 def check_grid(grid_shape: Dim3, prop: DeviceProp) -> None:
-    if lib.c_check_grid(grid_shape, byref(prop)) != 0:
-        raise ValueError("Invalid grid shape")
+    if (err := lib.c_check_grid(grid_shape, byref(prop))) != 0:
+        raise ValueError(f"Invalid grid shape: {os.strerror(err)}")
 
 def check_block(block_shape: Dim3, prop: DeviceProp) -> None:
-    if lib.c_check_block(block_shape, byref(prop)) != 0:
-        raise ValueError("Invalid block shape")
+    if (err := lib.c_check_block(block_shape, byref(prop))) != 0:
+        raise ValueError(f"Invalid block shape: {os.strerror(err)}")
 
 def run_kernel(grid_shape: Dim3, block_shape: Dim3) -> None:
     if (err := lib.c_run_kernel(grid_shape, block_shape)) != 0:
